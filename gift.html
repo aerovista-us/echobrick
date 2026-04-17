@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lucas Gift Reveal</title>
+  <style>
+    :root{
+      --bg1:#081224;
+      --bg2:#0d1f3a;
+      --gold:#ffcb37;
+      --gold2:#ff9800;
+      --blue:#2f7dff;
+      --cyan:#69ddff;
+      --green:#8be05e;
+      --paper:#123c86;
+      --paper2:#0f2b61;
+      --text:#f6fbff;
+      --muted:#c7d8f1;
+      --shadow:0 20px 50px rgba(0,0,0,.38);
+      --radius:28px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      min-height:100%;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top, rgba(80,140,255,.25), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(255,203,55,.12), transparent 25%),
+        linear-gradient(180deg,var(--bg2),var(--bg1));
+      overflow-x:hidden;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.7;
+      background:
+        radial-gradient(2px 2px at 12% 18%, rgba(255,255,255,.8), transparent 60%),
+        radial-gradient(2px 2px at 68% 10%, rgba(255,255,255,.7), transparent 60%),
+        radial-gradient(2px 2px at 88% 24%, rgba(255,255,255,.85), transparent 60%),
+        radial-gradient(2px 2px at 24% 64%, rgba(255,255,255,.65), transparent 60%),
+        radial-gradient(2px 2px at 77% 78%, rgba(255,255,255,.75), transparent 60%);
+    }
+
+    .page{
+      max-width:1100px;
+      margin:0 auto;
+      padding:22px 16px 48px;
+    }
+
+    .top-note{
+      text-align:center;
+      color:var(--muted);
+      font-weight:700;
+      letter-spacing:.04em;
+      margin-bottom:16px;
+    }
+
+    .scene{
+      display:grid;
+      gap:18px;
+      grid-template-columns:1fr;
+      align-items:start;
+    }
+
+    .gift-wrap{
+      position:relative;
+      width:min(92vw,720px);
+      margin:0 auto;
+      perspective:1200px;
+    }
+
+    .gift-box{
+      position:relative;
+      aspect-ratio: 1 / 1.26;
+      border-radius:34px;
+      box-shadow:var(--shadow);
+      transform-style:preserve-3d;
+    }
+
+    .box-under{
+      position:absolute;
+      inset:0;
+      border-radius:34px;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at top, rgba(255,236,165,.2), transparent 32%),
+        linear-gradient(180deg,#102444 0%, #0a1730 100%);
+      border:1px solid rgba(255,255,255,.12);
+    }
+
+    .box-under a{
+      display:block;
+      width:100%;
+      height:100%;
+      text-decoration:none;
+      color:inherit;
+      position:relative;
+    }
+
+    .box-under img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .box-gloss{
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg, rgba(255,255,255,.18), transparent 20%, transparent 70%, rgba(255,255,255,.06));
+      pointer-events:none;
+    }
+
+    .game-badge{
+      position:absolute;
+      left:14px;
+      right:14px;
+      bottom:14px;
+      padding:12px 14px;
+      border-radius:18px;
+      background:rgba(6,13,28,.72);
+      border:1px solid rgba(255,255,255,.14);
+      backdrop-filter:blur(10px);
+      font-size:.95rem;
+      font-weight:800;
+      text-align:center;
+      box-shadow:0 10px 24px rgba(0,0,0,.28);
+    }
+
+    .present-layer{
+      position:absolute;
+      inset:0;
+      border-radius:34px;
+      overflow:hidden;
+      background:
+        linear-gradient(180deg, rgba(18,60,134,.94), rgba(12,37,82,.98));
+    }
+
+    .paper-svg{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    .panel{
+      position:absolute;
+      overflow:hidden;
+      touch-action:none;
+      user-select:none;
+      transition:transform .55s cubic-bezier(.2,.85,.2,1), opacity .5s ease, filter .5s ease;
+      will-change:transform, opacity;
+      cursor:grab;
+    }
+
+    .panel:active{ cursor:grabbing; }
+
+    .panel.removed{
+      pointer-events:none;
+      opacity:0;
+      filter:blur(2px);
+    }
+
+    .panel.tl{ inset:0 50% 50% 0; border-top-left-radius:34px; }
+    .panel.tr{ inset:0 0 50% 50%; border-top-right-radius:34px; }
+    .panel.bl{ inset:50% 50% 0 0; border-bottom-left-radius:34px; }
+    .panel.br{ inset:50% 0 0 50%; border-bottom-right-radius:34px; }
+
+    .panel svg{
+      position:absolute;
+      inset:auto;
+      width:200%;
+      height:200%;
+      display:block;
+    }
+
+    .tl svg{ left:0; top:0; }
+    .tr svg{ right:0; top:0; transform:translateX(0); }
+    .bl svg{ left:0; bottom:0; }
+    .br svg{ right:0; bottom:0; }
+
+    .ribbon-v, .ribbon-h{
+      position:absolute;
+      background:linear-gradient(180deg, #ffdc72, #ffb400 55%, #ff9800);
+      box-shadow:0 0 0 1px rgba(255,255,255,.18), 0 10px 20px rgba(0,0,0,.2);
+      pointer-events:none;
+    }
+    .ribbon-v{
+      top:0; bottom:0; left:50%;
+      width:12%;
+      transform:translateX(-50%);
+    }
+    .ribbon-h{
+      left:0; right:0; top:48%;
+      height:10%;
+      transform:translateY(-50%);
+    }
+
+    .bow{
+      position:absolute;
+      left:50%;
+      top:48%;
+      width:170px;
+      height:120px;
+      transform:translate(-50%,-52%);
+      pointer-events:none;
+      filter:drop-shadow(0 10px 16px rgba(0,0,0,.28));
+    }
+
+    .tag{
+      position:absolute;
+      right:18px;
+      top:18px;
+      max-width:42%;
+      background:rgba(252,247,231,.96);
+      color:#1b2440;
+      border-radius:18px;
+      padding:12px 14px;
+      box-shadow:0 10px 20px rgba(0,0,0,.24);
+      transform:rotate(5deg);
+      border:2px solid rgba(255,203,55,.55);
+      pointer-events:none;
+    }
+
+    .tag .small{
+      display:block;
+      font-size:.75rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:#5a6485;
+      margin-bottom:3px;
+    }
+
+    .tag strong{
+      display:block;
+      font-size:1.08rem;
+      line-height:1.05;
+      margin-bottom:7px;
+    }
+
+    .instruction{
+      margin:18px auto 0;
+      max-width:560px;
+      text-align:center;
+      color:var(--muted);
+      font-weight:700;
+      line-height:1.45;
+    }
+
+    .instruction .accent{
+      color:#fff2b4;
+    }
+
+    .progress{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      margin-top:14px;
+    }
+
+    .dot{
+      width:14px;
+      height:14px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.24);
+      background:rgba(255,255,255,.12);
+      transition:all .25s ease;
+    }
+
+    .dot.on{
+      background:linear-gradient(180deg,var(--gold),var(--gold2));
+      box-shadow:0 0 14px rgba(255,203,55,.6);
+      transform:scale(1.08);
+    }
+
+    .reveal-copy{
+      margin:22px auto 0;
+      max-width:640px;
+      text-align:center;
+      opacity:.95;
+    }
+
+    .reveal-copy h1{
+      margin:0 0 8px;
+      font-size:clamp(1.8rem, 5vw, 3rem);
+      line-height:.96;
+    }
+
+    .reveal-copy p{
+      margin:0;
+      color:var(--muted);
+      font-size:1rem;
+      line-height:1.5;
+    }
+
+    .launch-btn{
+      display:inline-block;
+      margin-top:16px;
+      padding:14px 20px;
+      border-radius:18px;
+      text-decoration:none;
+      color:#fff;
+      font-weight:900;
+      background:linear-gradient(180deg, rgba(76,150,255,.98), rgba(26,97,227,.98));
+      box-shadow:0 14px 24px rgba(17,55,136,.35);
+    }
+
+    .launch-btn.hidden{ display:none; }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:18px;
+      transform:translateX(-50%) translateY(120%);
+      background:rgba(6,13,28,.94);
+      border:1px solid rgba(255,255,255,.14);
+      color:#fff6c5;
+      padding:12px 16px;
+      border-radius:16px;
+      transition:transform .3s ease;
+      z-index:10;
+      text-align:center;
+      max-width:min(92vw, 420px);
+      box-shadow:0 18px 30px rgba(0,0,0,.35);
+    }
+    .toast.show{ transform:translateX(-50%) translateY(0); }
+
+    @media (min-width:860px){
+      .scene{
+        grid-template-columns: minmax(360px,720px) 1fr;
+        gap:26px;
+      }
+      .gift-wrap{ width:min(60vw,720px); }
+      .reveal-copy{
+        text-align:left;
+        align-self:center;
+        margin-top:48px;
+      }
+      .instruction{
+        text-align:left;
+        margin-left:0;
+      }
+      .progress{
+        justify-content:flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="top-note">A surprise for Lucas</div>
+
+    <div class="scene">
+      <div>
+        <div class="gift-wrap">
+          <div class="gift-box" id="giftBox">
+            <div class="box-under">
+              <a href="https://aerovista-us.github.io/echobrick/" target="_blank" rel="noopener">
+                <img src="track_list_portrait.png" alt="Lucas and the EchoBrick game box">
+                <div class="box-gloss"></div>
+                <div class="game-badge">Tap the box after the wrapping is gone to open Lucas and the EchoBrick</div>
+              </a>
+            </div>
+
+            <div class="present-layer">
+              <div class="panel tl" data-panel="0"></div>
+              <div class="panel tr" data-panel="1"></div>
+              <div class="panel bl" data-panel="2"></div>
+              <div class="panel br" data-panel="3"></div>
+
+              <div class="ribbon-v"></div>
+              <div class="ribbon-h"></div>
+
+              <svg class="bow" viewBox="0 0 220 150" aria-hidden="true">
+                <defs>
+                  <linearGradient id="bowG" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#ffe787"/>
+                    <stop offset="48%" stop-color="#ffcb37"/>
+                    <stop offset="100%" stop-color="#ff9700"/>
+                  </linearGradient>
+                </defs>
+                <ellipse cx="62" cy="52" rx="50" ry="34" fill="url(#bowG)" transform="rotate(-18 62 52)"/>
+                <ellipse cx="158" cy="52" rx="50" ry="34" fill="url(#bowG)" transform="rotate(18 158 52)"/>
+                <ellipse cx="110" cy="58" rx="28" ry="24" fill="#ffb300"/>
+                <path d="M96 77 C92 108,82 120,70 146 L95 146 C99 126,105 103,110 84 Z" fill="url(#bowG)"/>
+                <path d="M124 77 C130 108,140 120,152 146 L127 146 C123 126,117 103,110 84 Z" fill="url(#bowG)"/>
+              </svg>
+
+              <div class="tag">
+                <span class="small">To</span>
+                <strong>Lucas</strong>
+                <span class="small">From</span>
+                <strong>Uncle Sam</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="instruction">
+          Swipe away each piece of wrapping paper to unwrap your gift.
+          <span class="accent">Four swipes</span> and the game box is fully revealed.
+        </div>
+        <div class="progress" id="progress">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+
+      <div class="reveal-copy">
+        <h1>Ready to unwrap your EchoBrick gift?</h1>
+        <p>
+          Lucas, this present is wrapped in your world — fast blue rings, soccer energy,
+          koala magic, and blocky adventure vibes. Tear the paper away and reveal what Uncle Sam brought you.
+        </p>
+        <a class="launch-btn hidden" id="launchBtn" href="https://aerovista-us.github.io/echobrick/" target="_blank" rel="noopener">Open Your Gift</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const fullSvg = `
+      <svg viewBox="0 0 1000 1260" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="paperBg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#174da8"/>
+            <stop offset="100%" stop-color="#0f2f69"/>
+          </linearGradient>
+          <pattern id="miniStars" width="120" height="120" patternUnits="userSpaceOnUse">
+            <circle cx="18" cy="18" r="3" fill="rgba(255,255,255,.55)" />
+            <circle cx="92" cy="25" r="2" fill="rgba(255,255,255,.45)" />
+            <circle cx="64" cy="82" r="2.5" fill="rgba(255,255,255,.42)" />
+            <path d="M36 68l5 14 14 5-14 5-5 14-5-14-14-5 14-5z" fill="rgba(255,240,168,.42)" />
+          </pattern>
+          <g id="brickBlue">
+            <rect x="0" y="18" width="86" height="42" rx="7" fill="#2f7dff"/>
+            <circle cx="22" cy="18" r="10" fill="#6bb8ff"/>
+            <circle cx="43" cy="18" r="10" fill="#6bb8ff"/>
+            <circle cx="64" cy="18" r="10" fill="#6bb8ff"/>
+          </g>
+          <g id="brickGold">
+            <rect x="0" y="18" width="86" height="42" rx="7" fill="#ffaf00"/>
+            <circle cx="22" cy="18" r="10" fill="#ffd66f"/>
+            <circle cx="43" cy="18" r="10" fill="#ffd66f"/>
+            <circle cx="64" cy="18" r="10" fill="#ffd66f"/>
+          </g>
+          <g id="ring">
+            <circle cx="0" cy="0" r="24" fill="none" stroke="#ffcb37" stroke-width="9"/>
+            <circle cx="0" cy="0" r="24" fill="none" stroke="#fff3b2" stroke-width="3" opacity=".65"/>
+          </g>
+          <g id="soccer">
+            <circle cx="0" cy="0" r="34" fill="#fff"/>
+            <polygon points="0,-12 11,-4 7,10 -7,10 -11,-4" fill="#1d2236"/>
+            <polygon points="-21,-9 -11,-4 -13,9 -27,7 -29,-7" fill="#1d2236"/>
+            <polygon points="21,-9 11,-4 13,9 27,7 29,-7" fill="#1d2236"/>
+          </g>
+          <g id="koalaFace">
+            <circle cx="0" cy="10" r="34" fill="#d7d9e0"/>
+            <circle cx="-25" cy="-10" r="15" fill="#d7d9e0"/>
+            <circle cx="25" cy="-10" r="15" fill="#d7d9e0"/>
+            <circle cx="-25" cy="-10" r="8" fill="#ffb5c8"/>
+            <circle cx="25" cy="-10" r="8" fill="#ffb5c8"/>
+            <ellipse cx="0" cy="15" rx="10" ry="13" fill="#21283b"/>
+            <circle cx="-10" cy="6" r="4" fill="#21283b"/>
+            <circle cx="10" cy="6" r="4" fill="#21283b"/>
+          </g>
+        </defs>
+
+        <rect width="1000" height="1260" fill="url(#paperBg)"/>
+        <rect width="1000" height="1260" fill="url(#miniStars)" opacity=".8"/>
+
+        <use href="#brickBlue" x="70" y="90" transform="rotate(-12 70 90)" opacity=".95"/>
+        <use href="#ring" x="830" y="124" opacity=".95"/>
+        <use href="#koalaFace" x="765" y="240" opacity=".95"/>
+        <use href="#brickGold" x="660" y="1020" transform="rotate(11 660 1020)" opacity=".95"/>
+        <use href="#soccer" x="170" y="980" opacity=".95"/>
+        <use href="#ring" x="195" y="312" transform="scale(.8)" opacity=".88"/>
+        <use href="#brickBlue" x="778" y="640" transform="rotate(8 778 640) scale(.9)" opacity=".88"/>
+        <use href="#koalaFace" x="160" y="690" transform="scale(.8)" opacity=".82"/>
+        <use href="#brickGold" x="108" y="508" transform="rotate(-8 108 508) scale(.9)" opacity=".92"/>
+        <use href="#soccer" x="846" y="824" transform="scale(.85)" opacity=".9"/>
+        <use href="#ring" x="526" y="884" transform="scale(1.05)" opacity=".72"/>
+        <use href="#brickBlue" x="430" y="208" transform="rotate(15 430 208) scale(.75)" opacity=".82"/>
+        <use href="#koalaFace" x="488" y="1104" transform="scale(.7)" opacity=".78"/>
+
+        <path d="M0 790 C210 690, 340 920, 515 815 S790 690, 1000 800" fill="none" stroke="rgba(105,221,255,.45)" stroke-width="18" stroke-linecap="round"/>
+        <path d="M0 820 C240 728, 358 948, 560 846 S805 705, 1000 836" fill="none" stroke="rgba(255,203,55,.38)" stroke-width="8" stroke-linecap="round"/>
+
+        <g opacity=".35">
+          <path d="M240 404 C278 390, 324 396, 352 430 C306 432, 264 420, 240 404 Z" fill="#9cecf7"/>
+          <path d="M352 430 C383 442, 404 462, 416 488 C382 482, 362 462, 352 430 Z" fill="#58d0ef"/>
+        </g>
+      </svg>
+    `;
+
+    const panels = [...document.querySelectorAll('.panel')];
+    panels.forEach(p => p.innerHTML = fullSvg);
+
+    const dots = [...document.querySelectorAll('.dot')];
+    const toast = document.getElementById('toast');
+    const launchBtn = document.getElementById('launchBtn');
+
+    function showToast(text){
+      toast.textContent = text;
+      toast.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => toast.classList.remove('show'), 1800);
+    }
+
+    function updateProgress(){
+      const removed = panels.filter(p => p.classList.contains('removed')).length;
+      dots.forEach((d,i)=> d.classList.toggle('on', i < removed));
+      if(removed === 4){
+        launchBtn.classList.remove('hidden');
+        showToast('Gift revealed!');
+      }
+    }
+
+    const swipeVectors = {
+      0: [-180, -170],
+      1: [180, -170],
+      2: [-180, 170],
+      3: [180, 170]
+    };
+
+    panels.forEach(panel => {
+      let startX = 0, startY = 0, active = false;
+
+      function pointerDown(e){
+        if(panel.classList.contains('removed')) return;
+        active = true;
+        startX = e.clientX ?? (e.touches && e.touches[0].clientX) ?? 0;
+        startY = e.clientY ?? (e.touches && e.touches[0].clientY) ?? 0;
+      }
+
+      function pointerMove(e){
+        if(!active || panel.classList.contains('removed')) return;
+        const x = e.clientX ?? (e.touches && e.touches[0].clientX) ?? startX;
+        const y = e.clientY ?? (e.touches && e.touches[0].clientY) ?? startY;
+        const dx = x - startX;
+        const dy = y - startY;
+        panel.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx * .04}deg)`;
+      }
+
+      function pointerUp(e){
+        if(!active || panel.classList.contains('removed')) return;
+        active = false;
+        const x = e.clientX ?? (e.changedTouches && e.changedTouches[0].clientX) ?? startX;
+        const y = e.clientY ?? (e.changedTouches && e.changedTouches[0].clientY) ?? startY;
+        const dx = x - startX;
+        const dy = y - startY;
+        const dist = Math.hypot(dx, dy);
+
+        if(dist > 55){
+          const [tx, ty] = swipeVectors[panel.dataset.panel];
+          panel.classList.add('removed');
+          panel.style.transform = `translate(${tx}px, ${ty}px) rotate(${tx * .08}deg)`;
+          updateProgress();
+          if(panels.filter(p => p.classList.contains('removed')).length < 4){
+            showToast('Nice! Keep unwrapping.');
+          }
+        } else {
+          panel.style.transform = '';
+        }
+      }
+
+      panel.addEventListener('pointerdown', pointerDown);
+      panel.addEventListener('pointermove', pointerMove);
+      panel.addEventListener('pointerup', pointerUp);
+      panel.addEventListener('pointercancel', pointerUp);
+
+      panel.addEventListener('touchstart', pointerDown, {passive:true});
+      panel.addEventListener('touchmove', pointerMove, {passive:true});
+      panel.addEventListener('touchend', pointerUp, {passive:true});
+    });
+
+    updateProgress();
+  </script>
+</body>
+</html>
