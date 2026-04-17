@@ -72,7 +72,8 @@
       background:linear-gradient(180deg, rgba(12,27,55,.82), rgba(8,17,32,.9)); box-shadow:var(--glow); margin-bottom:14px;
     }
     .hero-grid{display:grid; grid-template-columns:1fr;}
-    .hero-media{position:relative; aspect-ratio:1/1; overflow:hidden; background:#0e1730; cursor:pointer;}
+    .hero-left{display:grid; grid-template-rows:auto auto;}
+    .hero-media{position:relative; aspect-ratio:1/1; overflow:hidden; background:#0e1730; cursor:pointer; border-bottom:1px solid rgba(255,255,255,.08);}
     .hero-media img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .45s ease, opacity .35s ease;}
     .hero-media:hover img{transform:scale(1.015);}
     .hero-flip-note{
@@ -89,7 +90,6 @@
     .hero-copy{
       padding:18px 16px 20px;
       background:linear-gradient(180deg, rgba(8,17,32,.98), rgba(10,21,40,.98));
-      border-top:1px solid rgba(255,255,255,.08);
     }
     .eyebrow{
       display:inline-flex; align-items:center; gap:8px; color:#d6ffb0; font-size:.72rem; letter-spacing:.14em;
@@ -187,7 +187,8 @@
     .secret-toast.show{transform:translateX(-50%) translateY(0);}
 
     @media (min-width:860px){
-      .hero-grid{grid-template-columns:1.05fr .95fr;}
+      .hero-grid{grid-template-columns:1.05fr .95fr; align-items:start;}
+      .hero-left{display:grid; grid-template-rows:auto auto;}
       .hero-media{aspect-ratio:auto; min-height:620px;}
       .grid{grid-template-columns:.96fr 1.04fr; align-items:start;}
       .thumb-row{grid-template-columns:repeat(2,1fr);}
@@ -214,7 +215,8 @@
 
     <section class="hero">
       <div class="hero-grid">
-        <div class="hero-media" id="heroFlipArea" title="Double tap to flip the card">
+        <div class="hero-left">
+          <div class="hero-media" id="heroFlipArea" title="Double tap to flip the card">
           <div class="hero-flip-note" id="heroFlipNote">Double tap: flip card</div>
           <img id="heroImage" src="cover_lucas_and_the_echobrick.png" alt="Lucas and the EchoBrick cover art">
           <svg class="beam" viewBox="0 0 420 420" aria-hidden="true">
@@ -229,6 +231,7 @@
             <circle cx="210" cy="210" r="120" fill="url(#portalGlow)"><animate attributeName="r" values="112;126;112" dur="5.2s" repeatCount="indefinite"/></circle>
             <circle cx="210" cy="210" r="136" fill="none" stroke="url(#ringStroke)" stroke-width="5.5" stroke-linecap="round" stroke-dasharray="32 20"><animateTransform attributeName="transform" type="rotate" from="0 210 210" to="360 210 210" dur="14s" repeatCount="indefinite"/></circle>
           </svg>
+          </div>
           <div class="hero-copy">
             <div class="eyebrow">Lucas, your adventure starts here</div>
             <h1><span class="title-main">Lucas</span><span class="title-sub">and the EchoBrick</span></h1>
@@ -388,7 +391,7 @@
       "🟡 Lucas, Koala Kingdom says hi.",
       "💙 Lucas, your EchoVerse portal warmed up.",
       "⚽ Lucas, you found a hidden ring lane.",
-      "🌟 Lucas, Uncle Sam left you a bonus sparkle."
+      "🌟 Lucas, Daii left you a bonus sparkle."
     ];
 
     let current = 0;
