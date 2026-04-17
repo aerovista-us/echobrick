@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lucas and the EchoBrick | Your EchoStory World</title>
+  <style>
+    :root{
+      --bg:#071225;
+      --bg-deep:#08101b;
+      --blue:#2d7cff;
+      --blue-2:#5ad7ff;
+      --gold:#ffcc33;
+      --gold-2:#ff9d00;
+      --leaf:#88d85e;
+      --text:#f7fbff;
+      --muted:#c4d3ee;
+      --panel:rgba(7,18,37,.72);
+      --line:rgba(126,184,255,.22);
+      --glow:0 0 0 1px rgba(126,184,255,.18), 0 20px 50px rgba(0,0,0,.38);
+      --max:1120px;
+    }
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;padding:0;color:var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at 15% 8%, rgba(255,204,51,.22), transparent 14%),
+        radial-gradient(circle at 75% 0%, rgba(90,215,255,.13), transparent 20%),
+        radial-gradient(circle at 100% 35%, rgba(136,216,94,.10), transparent 22%),
+        linear-gradient(180deg, #07152c 0%, #081120 38%, #091524 100%);
+      min-height:100%;
+      overflow-x:hidden;
+    }
+    body::before{
+      content:"";
+      position:fixed; inset:0; pointer-events:none; z-index:0;
+      background:
+        radial-gradient(2px 2px at 14% 22%, rgba(255,255,255,.95), transparent 60%),
+        radial-gradient(1.5px 1.5px at 32% 10%, rgba(255,255,255,.85), transparent 60%),
+        radial-gradient(2px 2px at 78% 16%, rgba(255,255,255,.9), transparent 60%),
+        radial-gradient(1.5px 1.5px at 90% 28%, rgba(255,255,255,.8), transparent 60%),
+        radial-gradient(2px 2px at 68% 54%, rgba(255,255,255,.7), transparent 60%),
+        radial-gradient(1.5px 1.5px at 20% 68%, rgba(255,255,255,.65), transparent 60%);
+      opacity:.75;
+      animation: twinkle 8s linear infinite;
+    }
+    @keyframes twinkle { 0%,100%{opacity:.62;transform:translateY(0)} 50%{opacity:.95;transform:translateY(-2px)} }
+
+    .floaters{position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden;}
+    .floater{position:absolute; opacity:.65; animation: drift linear infinite; filter: drop-shadow(0 8px 10px rgba(0,0,0,.22));}
+    .floater.brick{width:46px; height:30px;}
+    .floater.ring{width:34px; height:34px;}
+    .floater.spark{width:22px; height:22px; opacity:.85;}
+    @keyframes drift{from{transform:translateY(8vh) rotate(0deg)} to{transform:translateY(-110vh) rotate(360deg)}}
+
+    .app{position:relative; z-index:1; width:min(100%, var(--max)); margin:0 auto; padding:14px 14px 42px;}
+    .topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap;}
+    .brand-stack{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+    .chip{
+      border:1px solid var(--line); border-radius:999px; padding:8px 12px;
+      background:rgba(255,255,255,.05); color:var(--muted); font-size:.82rem; backdrop-filter: blur(12px);
+    }
+    .chip strong{color:#fff}
+    .chip.accent{
+      background:linear-gradient(180deg, rgba(255,204,51,.14), rgba(255,157,0,.12));
+      color:#fff3c3; border-color:rgba(255,204,51,.24);
+    }
+
+    .hero{
+      position:relative; overflow:hidden; border-radius:30px; border:1px solid rgba(120,180,255,.2);
+      background:linear-gradient(180deg, rgba(12,27,55,.82), rgba(8,17,32,.9)); box-shadow:var(--glow); margin-bottom:14px;
+    }
+    .hero-grid{display:grid; grid-template-columns:1fr;}
+    .hero-media{position:relative; aspect-ratio:1/1; overflow:hidden; background:#0e1730; cursor:pointer;}
+    .hero-media img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .45s ease, opacity .35s ease;}
+    .hero-media:hover img{transform:scale(1.015);}
+    .hero-flip-note{
+      position:absolute; top:12px; right:12px; z-index:3;
+      padding:8px 11px; border-radius:999px; font-size:.77rem; font-weight:800;
+      background:rgba(7,18,37,.72); border:1px solid rgba(255,255,255,.14); backdrop-filter:blur(10px);
+    }
+    .beam{
+      position:absolute; inset:auto auto 8% 50%; width:min(85vw, 420px); height:min(85vw, 420px);
+      transform:translateX(-50%); opacity:.78; pointer-events:none; mix-blend-mode:screen; animation:pulse 6s ease-in-out infinite;
+    }
+    @keyframes pulse{0%,100%{transform:translateX(-50%) scale(.94); opacity:.58} 50%{transform:translateX(-50%) scale(1.03); opacity:.95}}
+
+    .hero-overlay{
+      position:absolute; inset:auto 0 0 0; padding:18px 16px 18px;
+      background:linear-gradient(180deg, transparent, rgba(6,12,23,.28) 20%, rgba(6,12,23,.94));
+    }
+    .eyebrow{
+      display:inline-flex; align-items:center; gap:8px; color:#d6ffb0; font-size:.72rem; letter-spacing:.14em;
+      text-transform:uppercase; font-weight:800; margin-bottom:10px;
+    }
+    .eyebrow::before{
+      content:""; width:8px; height:8px; border-radius:999px; background:linear-gradient(180deg,var(--gold),var(--gold-2));
+      box-shadow:0 0 12px rgba(255,204,51,.75);
+    }
+    h1{margin:0; line-height:.96; font-size:clamp(2rem, 7vw, 4rem); font-weight:900; letter-spacing:-.03em; text-shadow:0 8px 18px rgba(0,0,0,.32);}
+    .title-main{display:block; background:linear-gradient(180deg,#ffe672 0%, #ffc933 35%, #ff9c00 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
+    .title-sub{display:block; color:#f2f6ff; font-size:.48em; letter-spacing:.02em; margin-top:6px;}
+    .subbrand{margin:12px 0 0; font-size:1rem; color:#ecf5ff; font-weight:700;}
+    .subbrand .muted{color:#b7c8ea; font-weight:600;}
+    .subcopy{color:var(--muted); margin:10px 0 0; max-width:58ch; font-size:.97rem;}
+
+    .hero-side{padding:14px; display:grid; gap:12px; align-content:start;}
+    .panel{
+      border:1px solid var(--line); border-radius:24px; background:linear-gradient(180deg, rgba(11,24,47,.8), rgba(8,18,36,.84));
+      box-shadow:var(--glow); backdrop-filter: blur(12px); overflow:hidden; position:relative;
+    }
+    .panel::after{
+      content:""; position:absolute; inset:0 auto auto 0; width:100%; height:1px;
+      background:linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent); opacity:.4;
+    }
+    .section-head{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 16px 0;}
+    .section-head h2{margin:0; font-size:1rem;}
+    .section-head span{color:var(--muted); font-size:.82rem;}
+
+    .now-wrap{padding:12px 14px 14px;}
+    .now-meta{display:grid; grid-template-columns:84px 1fr; gap:12px; align-items:center; margin-bottom:12px;}
+    .mini-art{
+      width:84px; height:84px; border-radius:20px; object-fit:cover; border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 10px 20px rgba(0,0,0,.32); background:#11203b;
+    }
+    .track-kicker{color:#b8ffd3; font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.15em; margin:0 0 6px;}
+    .track-title{margin:0; font-size:1.28rem; line-height:1.05;}
+    .track-desc{margin:8px 0 0; color:var(--muted); font-size:.92rem;}
+
+    .player-shell{
+      position:relative; padding:10px 12px 12px; border-radius:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.06);
+    }
+    audio{width:100%; height:48px; border-radius:14px; margin:0;}
+    .controls{display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-top:12px;}
+    button{
+      border:0; border-radius:16px; padding:12px 10px; font:inherit; font-weight:800; color:#fff;
+      background:linear-gradient(180deg, rgba(76,150,255,.98), rgba(26,97,227,.98)); cursor:pointer;
+      box-shadow:0 12px 18px rgba(20,60,140,.35); transition:transform .15s ease, filter .15s ease;
+    }
+    button:hover, button:focus-visible{transform:translateY(-1px); filter:brightness(1.05);}
+    button.secondary{background:linear-gradient(180deg, rgba(26,44,75,.96), rgba(17,29,52,.96)); border:1px solid var(--line); box-shadow:none;}
+
+    .sparkline{margin-top:10px; width:100%; height:40px; opacity:.9;}
+    .grid{display:grid; grid-template-columns:1fr; gap:14px;}
+    .art-frame{padding:14px;}
+    .feature-wrap{
+      position:relative; overflow:hidden; border-radius:20px; background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.07);
+    }
+    .art-frame img#featureArt{width:100%; display:block; border-radius:20px; background:#0f1830; aspect-ratio:9/16; object-fit:cover;}
+    .art-badge{
+      position:absolute; left:12px; bottom:12px; padding:8px 12px; border-radius:999px; font-size:.78rem; font-weight:800;
+      background:rgba(8,17,32,.72); border:1px solid rgba(255,255,255,.12); backdrop-filter:blur(10px);
+    }
+
+    .thumb-row{display:grid; grid-template-columns:repeat(2,1fr); gap:9px; margin-top:10px;}
+    .thumb{width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:16px; cursor:pointer; background:#0e182c; border:1px solid rgba(255,255,255,.08); transition:transform .15s ease, border-color .15s ease;}
+    .thumb:hover{transform:translateY(-2px); border-color:rgba(255,204,51,.4);}
+
+    .list{padding:10px 10px 14px;}
+    .track{
+      display:grid; grid-template-columns:72px 1fr auto; gap:12px; align-items:center; width:100%;
+      background:rgba(255,255,255,.035); border:1px solid transparent; border-radius:20px; padding:10px; text-align:left; margin:8px 0 0; box-shadow:none;
+    }
+    .track.active{
+      border-color:rgba(255,204,51,.36);
+      background:radial-gradient(circle at left center, rgba(255,204,51,.08), transparent 28%), linear-gradient(180deg, rgba(42,74,136,.38), rgba(23,41,77,.26));
+    }
+    .track img{width:72px; height:72px; border-radius:16px; object-fit:cover; background:#12213b; border:1px solid rgba(255,255,255,.1);}
+    .track h3{margin:0 0 4px; font-size:1rem; line-height:1.08;}
+    .track p{margin:0; color:var(--muted); font-size:.86rem; line-height:1.25;}
+    .num{font-weight:900; font-size:1rem; color:#dfffbf; padding-left:6px;}
+    .story-body{padding:6px 16px 16px; color:var(--muted); line-height:1.55; font-size:.95rem;}
+    .badge-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;}
+    .mini-badge{padding:8px 10px; border-radius:999px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); font-size:.8rem; color:#e8f0ff;}
+    .footer-note{padding:18px 4px 6px; text-align:center; color:var(--muted); font-size:.82rem;}
+
+    .secret-toast{
+      position:fixed; left:50%; bottom:18px; transform:translateX(-50%) translateY(120%);
+      background:linear-gradient(180deg, rgba(22,34,60,.96), rgba(11,18,34,.96));
+      border:1px solid rgba(255,204,51,.28); color:#fff8d3; border-radius:16px; padding:12px 16px;
+      box-shadow:0 18px 30px rgba(0,0,0,.35); z-index:20; font-size:.92rem; transition:transform .35s ease; text-align:center; max-width:min(92vw, 420px);
+    }
+    .secret-toast.show{transform:translateX(-50%) translateY(0);}
+
+    @media (min-width:860px){
+      .hero-grid{grid-template-columns:1.05fr .95fr;}
+      .hero-media{aspect-ratio:auto; min-height:620px;}
+      .grid{grid-template-columns:.96fr 1.04fr; align-items:start;}
+      .thumb-row{grid-template-columns:repeat(2,1fr);}
+    }
+  </style>
+</head>
+<body>
+  <div class="floaters" aria-hidden="true">
+    <svg class="floater brick" style="left:7%; bottom:-40px; animation-duration:20s; animation-delay:-4s;" viewBox="0 0 46 30"><rect x="2" y="9" width="42" height="18" rx="3" fill="#2d7cff"/><circle cx="12" cy="11" r="4" fill="#73b2ff"/><circle cx="23" cy="11" r="4" fill="#73b2ff"/><circle cx="34" cy="11" r="4" fill="#73b2ff"/></svg>
+    <svg class="floater brick" style="left:88%; bottom:-80px; animation-duration:24s; animation-delay:-10s;" viewBox="0 0 46 30"><rect x="2" y="9" width="42" height="18" rx="3" fill="#ff9d00"/><circle cx="12" cy="11" r="4" fill="#ffd06e"/><circle cx="23" cy="11" r="4" fill="#ffd06e"/><circle cx="34" cy="11" r="4" fill="#ffd06e"/></svg>
+    <svg class="floater ring" style="left:21%; bottom:-30px; animation-duration:22s; animation-delay:-8s;" viewBox="0 0 34 34"><circle cx="17" cy="17" r="12" fill="none" stroke="#ffcc33" stroke-width="4"/><circle cx="17" cy="17" r="12" fill="none" stroke="#fff2a8" stroke-width="1.5" opacity=".7"/></svg>
+    <svg class="floater spark" style="left:74%; bottom:-20px; animation-duration:14s; animation-delay:-5s;" viewBox="0 0 24 24"><path d="M12 1l2.6 7.4L22 11l-7.4 2.6L12 21l-2.6-7.4L2 11l7.4-2.6L12 1z" fill="#fff6b8"/></svg>
+  </div>
+
+  <div class="app">
+    <div class="topbar">
+      <div class="brand-stack">
+        <div class="chip accent"><strong>EchoStory</strong></div>
+        <div class="chip"><strong>EchoVerse</strong></div>
+        <div class="chip"><strong>AeroVista</strong></div>
+      </div>
+      <div class="chip">Built for Lucas world mode</div>
+    </div>
+
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-media" id="heroFlipArea" title="Double tap to flip the card">
+          <div class="hero-flip-note" id="heroFlipNote">Double tap: flip card</div>
+          <img id="heroImage" src="cover_lucas_and_the_echobrick.png" alt="Lucas and the EchoBrick cover art">
+          <svg class="beam" viewBox="0 0 420 420" aria-hidden="true">
+            <defs>
+              <radialGradient id="portalGlow" cx="50%" cy="50%">
+                <stop offset="0%" stop-color="#fff8bf" stop-opacity=".95"/><stop offset="30%" stop-color="#ffd45c" stop-opacity=".55"/><stop offset="60%" stop-color="#5ad7ff" stop-opacity=".22"/><stop offset="100%" stop-color="#5ad7ff" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="ringStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#fff2ab"/><stop offset="45%" stop-color="#ffcc33"/><stop offset="100%" stop-color="#5ad7ff"/>
+              </linearGradient>
+            </defs>
+            <circle cx="210" cy="210" r="120" fill="url(#portalGlow)"><animate attributeName="r" values="112;126;112" dur="5.2s" repeatCount="indefinite"/></circle>
+            <circle cx="210" cy="210" r="136" fill="none" stroke="url(#ringStroke)" stroke-width="5.5" stroke-linecap="round" stroke-dasharray="32 20"><animateTransform attributeName="transform" type="rotate" from="0 210 210" to="360 210 210" dur="14s" repeatCount="indefinite"/></circle>
+          </svg>
+          <div class="hero-overlay">
+            <div class="eyebrow">Lucas, your adventure starts here</div>
+            <h1><span class="title-main">Lucas</span><span class="title-sub">and the EchoBrick</span></h1>
+            <div class="subbrand">Your EchoStory world by EchoVerse <span class="muted">| an AeroVista Production</span></div>
+            <p class="subcopy">Lucas, this is your music world — your songs, your art, your hidden portals, your bright colors, and your next adventure all in one place.</p>
+          </div>
+        </div>
+
+        <div class="hero-side">
+          <div class="panel">
+            <div class="section-head">
+              <h2>Lucas, You’re Playing</h2>
+              <span id="trackCount">5 songs in your world</span>
+            </div>
+            <div class="now-wrap">
+              <div class="now-meta">
+                <img id="nowArt" class="mini-art" src="lucas_and_the_echobrick.png" alt="">
+                <div>
+                  <div class="track-kicker" id="nowNumber">Your Song 1</div>
+                  <h3 class="track-title" id="nowTitle">Lucas and the Echo Brick</h3>
+                  <p class="track-desc" id="nowDesc">Lucas, this is your hero song — the magical Echo Brick lights up for you.</p>
+                </div>
+              </div>
+              <div class="player-shell">
+                <audio id="audioPlayer" controls preload="metadata">
+                  <source src="1_LUCAS_AND_THE_ECHO_BRICK.mp3" type="audio/mpeg">
+                  Your browser does not support the audio element.
+                </audio>
+                <svg class="sparkline" id="sparkline" viewBox="0 0 320 40" aria-hidden="true">
+                  <defs><linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#5ad7ff"/><stop offset="45%" stop-color="#ffcc33"/><stop offset="100%" stop-color="#88d85e"/></linearGradient></defs>
+                  <path id="wavePath" d="M0 20 C 15 12, 25 30, 40 20 S 65 10, 80 20 105 30, 120 20 145 8, 160 20 185 32, 200 20 225 8, 240 20 265 30, 280 20 305 12, 320 20" fill="none" stroke="url(#waveGrad)" stroke-width="4" stroke-linecap="round"/>
+                </svg>
+                <div class="controls">
+                  <button class="secondary" id="prevBtn" type="button">◀ Prev</button>
+                  <button id="playPauseBtn" type="button">Play / Pause</button>
+                  <button class="secondary" id="nextBtn" type="button">Next ▶</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="section-head">
+              <h2>Your Adventure Lane</h2>
+              <span>Lucas world mode</span>
+            </div>
+            <div class="story-body">
+              Your 5-song journey starts with the Echo Brick, teams up with your crew, levels up your hero heart, opens Koala Kingdom, and ends with a glowing goodbye until your next big adventure. Tap any song to jump into the next part of your world.
+              <div class="badge-row">
+                <div class="mini-badge">✨ surprises from your world</div>
+                <div class="mini-badge">🟡 colors from your cover</div>
+                <div class="mini-badge">📱 built for your phone</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="section-head">
+              <h2>Your World Files</h2>
+              <span>Everything linked and ready</span>
+            </div>
+            <div class="story-body">
+              <strong>Main hero:</strong> cover_lucas_and_the_echobrick.png<br>
+              <strong>Hero flip image:</strong> back_track_list.png<br>
+              <strong>Portrait track list:</strong> track_list_portrait.png<br>
+              <strong>Large portrait art:</strong> HomieMode.png, HeroHeart.png, next_adventure.png<br>
+              <strong>Landscape gallery:</strong> art_gallery.png<br>
+              <strong>Lower track selector art:</strong> lucas_and_the_echobrick.png, koala_kingdom.png, homie_mode.png, hero_heart.png, see_you_in_the_next_adventure.png
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="panel">
+        <div class="section-head">
+          <h2>Artwork Gallery</h2>
+          <span>Cover + track visuals</span>
+        </div>
+        <div class="art-frame">
+          <div class="feature-wrap">
+            <img id="featureArt" src="cover_lucas_and_the_echobrick.png" alt="Featured album artwork">
+            <div class="art-badge" id="artBadge">Album Cover</div>
+          </div>
+          <div class="thumb-row" id="thumbRow"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <h2>Track List</h2>
+          <span>Tap any song</span>
+        </div>
+        <div class="list" id="trackList"></div>
+      </section>
+    </div>
+
+    
+
+    <div class="footer-note">Lucas and the EchoBrick · your EchoStory world by EchoVerse · an AeroVista Production</div>
+  </div>
+
+  <div class="secret-toast" id="secretToast"></div>
+
+  <script>
+    const tracks = [
+      {
+        number: 1,
+        title: "Lucas and the Echo Brick",
+        description: "Lucas, this is your hero song — the magical Echo Brick lights up for you.",
+        audio: "1_LUCAS_AND_THE_ECHO_BRICK.mp3",
+        art: "lucas_and_the_echobrick.png",
+        feature: "cover_lucas_and_the_echobrick.png",
+        featureLabel: "Album Cover",
+        color: "#ffcc33"
+      },
+      {
+        number: 2,
+        title: "Homie Mode",
+        description: "Lucas, this is your crew-up song — loud, fun, and full of homie energy.",
+        audio: "2_HOMIE_MODE.mp3",
+        art: "homie_mode.png",
+        feature: "HomieMode.png",
+        featureLabel: "Track 2 Feature Art",
+        color: "#73ff84"
+      },
+      {
+        number: 3,
+        title: "Hero Heart",
+        description: "Lucas, this is your heart song — warm, brave, and full of who you are.",
+        audio: "3_HERO_HEART.mp3",
+        art: "hero_heart.png",
+        feature: "HeroHeart.png",
+        featureLabel: "Track 3 Feature Art",
+        color: "#ffb454"
+      },
+      {
+        number: 4,
+        title: "Koala Kingdom",
+        description: "Lucas, this is your Koala Kingdom song — a bright secret world made for adventure.",
+        audio: "4_KOALA_KINGDOM.mp3",
+        art: "koala_kingdom.png",
+        feature: "art_gallery.png",
+        featureLabel: "Album Cover",
+        color: "#c4ff6e"
+      },
+      {
+        number: 5,
+        title: "See You in the Next Adventure",
+        description: "Lucas, this is your glowing sendoff song — until your next adventure starts.",
+        audio: "5_SEE_YOU_IN_THE_NEXT_ADVENTURE.mp3",
+        art: "see_you_in_the_next_adventure.png",
+        feature: "next_adventure.png",
+        featureLabel: "Track 5 Feature Art",
+        color: "#6ed1ff"
+      }
+    ];
+
+    const gallery = [
+      { src: "cover_lucas_and_the_echobrick.png", alt: "Album cover", label: "Album Cover" },
+      { src: "back_track_list.png", alt: "Back track list artwork", label: "Back Track List" },
+      { src: "track_list_portrait.png", alt: "Portrait track list", label: "Track List Portrait" },
+      { src: "art_gallery.png", alt: "Art gallery overview", label: "Art Gallery" },
+      { src: "HomieMode.png", alt: "Homie Mode feature art", label: "Track 2 Feature Art" },
+      { src: "HeroHeart.png", alt: "Hero Heart feature art", label: "Track 3 Feature Art" },
+      { src: "next_adventure.png", alt: "Next Adventure feature art", label: "Track 5 Feature Art" }
+    ];
+
+    const secrets = [
+      "✨ Lucas, you unlocked the EchoBrick glow.",
+      "🟡 Lucas, Koala Kingdom says hi.",
+      "💙 Lucas, your EchoVerse portal warmed up.",
+      "⚽ Lucas, you found a hidden ring lane.",
+      "🌟 Lucas, Uncle Sam left you a bonus sparkle."
+    ];
+
+    let current = 0;
+    let heroClicks = 0;
+    let lastTap = 0;
+    let heroFront = true;
+
+    const audio = document.getElementById("audioPlayer");
+    const nowArt = document.getElementById("nowArt");
+    const nowNumber = document.getElementById("nowNumber");
+    const nowTitle = document.getElementById("nowTitle");
+    const nowDesc = document.getElementById("nowDesc");
+    const heroImage = document.getElementById("heroImage");
+    const heroFlipArea = document.getElementById("heroFlipArea");
+    const heroFlipNote = document.getElementById("heroFlipNote");
+    const featureArt = document.getElementById("featureArt");
+    const trackList = document.getElementById("trackList");
+    const thumbRow = document.getElementById("thumbRow");
+    const playPauseBtn = document.getElementById("playPauseBtn");
+    const artBadge = document.getElementById("artBadge");
+    const toast = document.getElementById("secretToast");
+    const wavePath = document.getElementById("wavePath");
+
+    function showToast(text){
+      toast.textContent = text;
+      toast.classList.add("show");
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    function updateWave(index){
+      const waves = [
+        "M0 20 C 15 12, 25 30, 40 20 S 65 10, 80 20 105 30, 120 20 145 8, 160 20 185 32, 200 20 225 8, 240 20 265 30, 280 20 305 12, 320 20",
+        "M0 20 C 12 8, 24 34, 36 20 S 60 6, 78 20 102 34, 120 20 142 6, 160 20 184 34, 202 20 224 6, 242 20 266 34, 284 20 306 10, 320 20",
+        "M0 20 C 18 14, 30 26, 46 20 S 70 14, 90 20 114 26, 134 20 158 14, 178 20 202 28, 222 20 248 10, 268 20 292 28, 308 20 320 20",
+        "M0 20 C 14 30, 28 10, 42 20 S 68 30, 86 20 110 10, 128 20 150 30, 168 20 192 10, 210 20 236 30, 254 20 280 10, 298 20 320 20",
+        "M0 20 C 14 12, 28 28, 40 20 S 62 14, 84 20 108 28, 130 20 154 12, 176 20 200 28, 222 20 248 10, 272 20 296 30, 312 20 320 20"
+      ];
+      wavePath.setAttribute("d", waves[index % waves.length]);
+    }
+
+    function setHeroImage(){
+      heroImage.src = heroFront ? "cover_lucas_and_the_echobrick.png" : "back_track_list.png";
+      heroImage.alt = heroFront ? "Lucas and the EchoBrick cover art" : "Lucas and the EchoBrick back track list";
+      heroFlipNote.textContent = heroFront ? "Double tap: flip card" : "Double tap: flip back";
+    }
+
+    function renderTracks() {
+      trackList.innerHTML = "";
+      tracks.forEach((track, index) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "track" + (index === current ? " active" : "");
+        btn.innerHTML = `
+          <img src="${track.art}" alt="${track.title} artwork">
+          <div>
+            <h3>${track.title}</h3>
+            <p>${track.description}</p>
+          </div>
+          <div class="num">0${track.number}</div>
+        `;
+        btn.addEventListener("click", () => loadTrack(index, true));
+        trackList.appendChild(btn);
+      });
+    }
+
+    function renderGallery() {
+      thumbRow.innerHTML = "";
+      gallery.forEach(item => {
+        const img = document.createElement("img");
+        img.src = item.src;
+        img.alt = item.alt;
+        img.className = "thumb";
+        img.loading = "lazy";
+        img.addEventListener("click", () => {
+          featureArt.src = item.src;
+          featureArt.alt = item.alt;
+          artBadge.textContent = item.label;
+          if (item.label === "Art Gallery") showToast("🌌 Lucas, your gallery is glowing.");
+        });
+        thumbRow.appendChild(img);
+      });
+    }
+
+    function loadTrack(index, autoplay = false) {
+      current = index;
+      const track = tracks[index];
+      audio.src = track.audio;
+      nowArt.src = track.art;
+      nowArt.alt = track.title + " artwork";
+      nowNumber.textContent = "Your Song " + track.number;
+      nowTitle.textContent = track.title;
+      nowDesc.textContent = track.description;
+      featureArt.src = track.feature;
+      featureArt.alt = track.title + " feature artwork";
+      artBadge.textContent = track.featureLabel;
+      document.documentElement.style.setProperty("--gold", track.color);
+      updateWave(index);
+      renderTracks();
+      if (autoplay) audio.play().catch(() => {});
+    }
+
+    document.getElementById("prevBtn").addEventListener("click", () => {
+      const nextIndex = (current - 1 + tracks.length) % tracks.length;
+      loadTrack(nextIndex, true);
+    });
+
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      const nextIndex = (current + 1) % tracks.length;
+      loadTrack(nextIndex, true);
+    });
+
+    playPauseBtn.addEventListener("click", async () => {
+      if (audio.paused) {
+        try { await audio.play(); } catch (e) {}
+      } else {
+        audio.pause();
+      }
+    });
+
+    audio.addEventListener("ended", () => {
+      const nextIndex = (current + 1) % tracks.length;
+      loadTrack(nextIndex, true);
+    });
+
+    heroFlipArea.addEventListener("click", () => {
+      const now = Date.now();
+      heroClicks += 1;
+      if (now - lastTap < 320) {
+        heroFront = !heroFront;
+        setHeroImage();
+        showToast(heroFront ? "✨ Lucas, front cover restored." : "📜 Lucas, back track card revealed.");
+      }
+      lastTap = now;
+
+      if (heroClicks === 5) {
+        showToast(secrets[Math.floor(Math.random() * secrets.length)]);
+        heroClicks = 0;
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      const key = e.key.toLowerCase();
+      if (key === "k") {
+        loadTrack(3, true);
+        showToast("👑 Lucas, Koala Kingdom opened fast.");
+      }
+      if (key === "e") {
+        heroFront = true;
+        setHeroImage();
+        featureArt.src = "art_gallery.png";
+        artBadge.textContent = "Art Gallery";
+        showToast("✨ Lucas, your gallery jumped back to home.");
+      }
+      if (key === "t") {
+        window.open("track_list_portrait.png", "_blank");
+      }
+    });
+
+    renderGallery();
+    renderTracks();
+    setHeroImage();
+    loadTrack(0, false);
+  </script>
+</body>
+</html>
