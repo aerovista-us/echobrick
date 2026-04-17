@@ -86,9 +86,10 @@
     }
     @keyframes pulse{0%,100%{transform:translateX(-50%) scale(.94); opacity:.58} 50%{transform:translateX(-50%) scale(1.03); opacity:.95}}
 
-    .hero-overlay{
-      position:absolute; inset:auto 0 0 0; padding:18px 16px 18px;
-      background:linear-gradient(180deg, transparent, rgba(6,12,23,.28) 20%, rgba(6,12,23,.94));
+    .hero-copy{
+      padding:18px 16px 20px;
+      background:linear-gradient(180deg, rgba(8,17,32,.98), rgba(10,21,40,.98));
+      border-top:1px solid rgba(255,255,255,.08);
     }
     .eyebrow{
       display:inline-flex; align-items:center; gap:8px; color:#d6ffb0; font-size:.72rem; letter-spacing:.14em;
@@ -228,7 +229,7 @@
             <circle cx="210" cy="210" r="120" fill="url(#portalGlow)"><animate attributeName="r" values="112;126;112" dur="5.2s" repeatCount="indefinite"/></circle>
             <circle cx="210" cy="210" r="136" fill="none" stroke="url(#ringStroke)" stroke-width="5.5" stroke-linecap="round" stroke-dasharray="32 20"><animateTransform attributeName="transform" type="rotate" from="0 210 210" to="360 210 210" dur="14s" repeatCount="indefinite"/></circle>
           </svg>
-          <div class="hero-overlay">
+          <div class="hero-copy">
             <div class="eyebrow">Lucas, your adventure starts here</div>
             <h1><span class="title-main">Lucas</span><span class="title-sub">and the EchoBrick</span></h1>
             <div class="subbrand">Your EchoStory world by EchoVerse <span class="muted">| an AeroVista Production</span></div>
@@ -271,34 +272,19 @@
 
           <div class="panel">
             <div class="section-head">
-              <h2>Your Adventure Lane</h2>
-              <span>Lucas world mode</span>
+              <h2>Welcome to Your EchoStory, Lucas</h2>
+              <span>Your adventure is live</span>
             </div>
             <div class="story-body">
-              Your 5-song journey starts with the Echo Brick, teams up with your crew, levels up your hero heart, opens Koala Kingdom, and ends with a glowing goodbye until your next big adventure. Tap any song to jump into the next part of your world.
+              Hey Lucas — this place is made just for you. Every song opens a different part of your adventure: the glowing Echo Brick, your wild homie crew, your big hero heart, secret paths through Koala Kingdom, and one last warm sendoff before the next adventure begins. Press play, tap around, flip the big cover card, and explore your world.
               <div class="badge-row">
                 <div class="mini-badge">✨ surprises from your world</div>
-                <div class="mini-badge">🟡 colors from your cover</div>
-                <div class="mini-badge">📱 built for your phone</div>
+                <div class="mini-badge">🌟 surprise sparkles</div>
+                <div class="mini-badge">🎵 tap a song to jump in</div>
               </div>
             </div>
           </div>
-
-          <div class="panel">
-            <div class="section-head">
-              <h2>Your World Files</h2>
-              <span>Everything linked and ready</span>
-            </div>
-            <div class="story-body">
-              <strong>Main hero:</strong> cover_lucas_and_the_echobrick.png<br>
-              <strong>Hero flip image:</strong> back_track_list.png<br>
-              <strong>Portrait track list:</strong> track_list_portrait.png<br>
-              <strong>Large portrait art:</strong> HomieMode.png, HeroHeart.png, next_adventure.png<br>
-              <strong>Landscape gallery:</strong> art_gallery.png<br>
-              <strong>Lower track selector art:</strong> lucas_and_the_echobrick.png, koala_kingdom.png, homie_mode.png, hero_heart.png, see_you_in_the_next_adventure.png
-            </div>
-          </div>
-        </div>
+</div>
       </div>
     </section>
 
